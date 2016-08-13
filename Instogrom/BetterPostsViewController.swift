@@ -56,6 +56,28 @@ class BetterPostsViewController: UITableViewController,UIImagePickerControllerDe
             
             cell.postKey = snapshot.key as! String
             cell.imgPath = postData["imagePath"] as! String
+            
+            let likeRef: FIRDatabaseReference! = self.postsRef.child(snapshot.key).child("Likes")
+            likeRef.observeEventType(FIRDataEventType.Value, withBlock: {
+                snapshot in
+                
+                if let likesList = snapshot.value as? Array<String>{
+                    if likesList.count > 0 {
+                        cell.LikeButton.setTitle("Likes(\(likesList.count))", forState: UIControlState.Normal)
+                    }
+                }
+                
+            })
+            
+            let commentRef: FIRDatabaseReference! = self.postsRef.child(snapshot.key).child("Comments")
+            commentRef.observeEventType(FIRDataEventType.Value, withBlock: {
+                snapshot in
+                
+                if let commentList = snapshot.value as? Dictionary<String,AnyObject>{
+                        cell.commentButton.setTitle("留言(\(commentList.count))", forState: UIControlState.Normal)
+                }
+                
+            })
         }
         
         tableView.dataSource = dataSource
@@ -212,12 +234,38 @@ class BetterPostsViewController: UITableViewController,UIImagePickerControllerDe
     
     // MARK: - Post Cell Like Button Tapped
     func postCellLikeButtonTapped(postCell: PostCell) {
-        print("like button click.")
-        print("postKey: \(postCell.postKey)")
+        // print("postKey: \(postCell.postKey)")
         let likeRef = postsRef.child(postCell.postKey).child("Likes")
-        
-        if let currentUser = FIRAuth.auth()?.currentUser {
-            
+        if let currentUser = FIRAuth.auth()?.currentUser{
+            likeRef.observeEventType(FIRDataEventType.Value, withBlock: {
+                snapshot in
+                let userID = currentUser.uid as! String
+                var value = snapshot.value as? Array<String>
+
+                let index = value.map({ (v) -> Int in
+                    for (index, val) in v.enumerate() {
+                        if( val == userID  ){
+                            return index
+                        }
+                    }
+                    
+                    return -1
+                })
+                
+                if index >= 0 {
+                    print("uid exists.")
+                } else {
+                    if( value == nil ){
+                        likeRef.setValue([currentUser.uid])
+                    } else {
+                        value? += [currentUser.uid]
+                        likeRef.setValue(value)
+                    }
+                    print(value)
+                }
+
+                
+            })
         }
         
         
@@ -235,3 +283,4 @@ class BetterPostsViewController: UITableViewController,UIImagePickerControllerDe
         }
     }
 }
+

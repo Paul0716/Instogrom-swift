@@ -30,10 +30,12 @@ class PostTableViewController: UITableViewController, submitCellDelegate {
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
         ref = FIRDatabase.database().reference()
         postRef = ref.child("posts").child(postCell.postKey).child("Comments")
-        postRef.observeEventType(FIRDataEventType.Value, withBlock: { snapshot in
-            let post = snapshot.value as! [String:AnyObject]
-            self.comments = post
-            self.tableView.reloadData()
+        postRef.observeEventType(FIRDataEventType.Value, withBlock: {
+            snapshot in
+            if let post = snapshot.value as? [String:AnyObject] {
+                self.comments = post
+                self.tableView.reloadData()
+            }
         })
     }
 

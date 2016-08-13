@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Firebase
 
 protocol PostCellDelegate {
     func postCellLongPress(postCell: PostCell)
@@ -21,6 +22,8 @@ class PostCell: UITableViewCell {
     // MARK: -Properties
     @IBOutlet weak var emailLabel: UILabel!
     @IBOutlet weak var photoImageView: UIImageView!
+    @IBOutlet weak var LikeButton: UIButton!
+    @IBOutlet weak var commentButton: UIButton!
     
     
     var delegate: PostCellDelegate?
@@ -37,6 +40,10 @@ class PostCell: UITableViewCell {
         
         tapGesture = UITapGestureRecognizer(target: self, action: #selector(cellTapped))
         photoImageView.addGestureRecognizer(tapGesture)
+        
+        
+        
+//        LikeButton.setTitle("Likes", forState: UIControlState.Normal)
     }
     
     // MARK: -longPressed
